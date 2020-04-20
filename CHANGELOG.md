@@ -1,4 +1,4 @@
-### Upcoming
+### 0.1.1
 
 - Try not to lint deleted files
 - Try not to unstash when no files have been stashed
