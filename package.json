@@ -1,0 +1,47 @@
+{
+  "name": "lint-unpushed",
+  "version": "0.0.0",
+  "description": "Lint code before it's pushed",
+  "bin": "lib/cli.js",
+  "scripts": {
+    "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
+    "prepare": "sb-babel-cli src -o lib --typescript",
+    "watch": "yarn prepare -watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steelbrain/lint-unpushed.git"
+  },
+  "author": "steelbrain",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/steelbrain/lint-unpushed/issues"
+  },
+  "files": [
+    "lib/*"
+  ],
+  "homepage": "https://github.com/steelbrain/lint-unpushed#readme",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/listr": "^0.14.2",
+    "@types/micromatch": "^4.0.1",
+    "@types/node": "^13.13.0",
+    "@types/shell-escape": "^0.2.0",
+    "eslint-config-steelbrain": "^9.0.1",
+    "sb-babel-cli": "^3.0.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "commander": "^5.0.0",
+    "execa": "^4.0.0",
+    "listr": "^0.14.3",
+    "micromatch": "^4.0.2",
+    "shell-escape": "^0.2.0",
+    "zen-observable": "^0.8.15"
+  },
+  "engines": {
+    "node": ">= 8"
+  }
+}
