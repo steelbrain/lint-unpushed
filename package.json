@@ -30,6 +30,7 @@
     "@types/node": "^13.13.0",
     "@types/shell-escape": "^0.2.0",
     "eslint-config-steelbrain": "^9.0.1",
+    "prettier": "^2.0.4",
     "sb-babel-cli": "^3.0.0",
     "typescript": "^3.8.3"
   },

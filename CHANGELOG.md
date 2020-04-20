@@ -1,3 +1,8 @@
-### 0.0.1
+### Upcoming
+
+- Try not to lint deleted files
+- Try not to unstash when no files have been stashed
+
+### 0.1.0
 
 - Initial release

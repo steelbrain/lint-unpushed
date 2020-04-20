@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable max-classes-per-file */
 
 import fs from 'fs'
 import path from 'path'
@@ -9,8 +10,8 @@ import shellEscape from 'shell-escape'
 import micromatch from 'micromatch'
 import commander from 'commander'
 import Observable from 'zen-observable'
-import manifest from '../package.json'
 import { Stream } from 'stream'
+import manifest from '../package.json'
 
 const MANIFEST_KEY = 'lint-unpushed'
 const REGEXP_REFERENCE = /^## ([\S+]+)\.\.\.(\S+)($| )/
@@ -18,10 +19,7 @@ const REGEXP_REFERENCE = /^## ([\S+]+)\.\.\.(\S+)($| )/
 // eg: ## master...origin/master [ahead 1]
 const LOCAL_PACKAGE = path.join(process.cwd(), 'package.json')
 
-commander
-  .name(MANIFEST_KEY)
-  .version(manifest.version)
-  .parse(process.argv)
+commander.name(MANIFEST_KEY).version(manifest.version).parse(process.argv)
 
 export class CLIWarning extends Error {}
 export class CLIError extends Error {
@@ -45,10 +43,10 @@ async function getReferences() {
 }
 
 async function observableExec(command: string) {
-  return new Observable(observer => {
-    const chunks: string[]= []
+  return new Observable((observer) => {
+    const chunks: string[] = []
     const proc = execa(command, { shell: true, all: true })
-    proc.on('error', err => {
+    proc.on('error', (err) => {
       observer.error(err)
     })
     const lineInterface = readline.createInterface({
@@ -58,12 +56,14 @@ async function observableExec(command: string) {
       terminal: false,
       historySize: 0,
     })
-    lineInterface.on('line', line => {
+    lineInterface.on('line', (line) => {
       observer.next(line)
     })
-    proc.all?.on('data', (chunk) => {
-      chunks.push(chunk.toString('utf8'))
-    })
+    if (proc.all != null) {
+      proc.all.on('data', (chunk) => {
+        chunks.push(chunk.toString('utf8'))
+      })
+    }
     proc.on('exit', (exitCode) => {
       if (exitCode !== 0) {
         observer.error(new CLIError(`Process exited with non-zero code: ${exitCode}`, chunks.join(' ')))
@@ -77,7 +77,7 @@ async function observableExec(command: string) {
 
 async function filesInGetRange(from: string, to: string): Promise<string[] | null> {
   try {
-    const output = await execa('git', ['diff', `${from}..${to}`, '--name-only'])
+    const output = await execa('git', ['diff', `${to}..${from}`, '--name-only', '--diff-filter=d'])
     return output.stdout.split('\n')
   } catch (_) {
     return null
@@ -88,7 +88,7 @@ async function filesInGetRange(from: string, to: string): Promise<string[] | nul
 async function runFileScripts(scripts: Record<string, string | string[]>, files: string[]) {
   if (
     !Object.values(scripts).every(
-      item => typeof item === 'string' || (Array.isArray(item) && item.every(subItem => typeof subItem === 'string')),
+      (item) => typeof item === 'string' || (Array.isArray(item) && item.every((subItem) => typeof subItem === 'string')),
     )
   ) {
     throw new Error(
@@ -112,7 +112,7 @@ async function runFileScripts(scripts: Record<string, string | string[]>, files:
             return observableExec(`${value} ${filesCmd}`)
           }
           return new Listr(
-            value.map(item => ({
+            value.map((item) => ({
               title: item,
               task: () => observableExec(`${item} ${filesCmd}`),
             })),
@@ -127,12 +127,12 @@ async function runFileScripts(scripts: Record<string, string | string[]>, files:
 
 // { lint-pushed: [x, y] } means x and y commands dont get files as parameters
 async function runPackageScripts(scripts: string[]) {
-  if (!scripts.every(item => typeof item === 'string')) {
+  if (!scripts.every((item) => typeof item === 'string')) {
     throw new Error(`Malformed configuration for '${MANIFEST_KEY}' at ${LOCAL_PACKAGE}. Expected value to be Array<string>`)
   }
 
   const listr = new Listr(
-    scripts.map(item => ({
+    scripts.map((item) => ({
       title: item,
       task: () => observableExec(item),
     })),
@@ -182,8 +182,10 @@ async function main() {
         title: 'Stash changes',
         async task() {
           try {
-            await execa('git', ['stash', '--include-untracked'])
-            stashed = true
+            const output = await execa('git', ['stash', '--include-untracked'])
+            if (output.stdout !== 'No local changes to save') {
+              stashed = true
+            }
           } catch (_) {
             // No Op
           }
@@ -216,7 +218,7 @@ async function main() {
   }
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.log()
   if (err instanceof CLIWarning) {
     console.error('Warning:', err && err.message)
