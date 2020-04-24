@@ -60,11 +60,9 @@ async function observableExec(command: string) {
     lineInterface.on('line', (line) => {
       observer.next(line)
     })
-    if (proc.all != null) {
-      proc.all.on('data', (chunk) => {
-        chunks.push(chunk.toString('utf8'))
-      })
-    }
+    proc.all!.on('data', (chunk) => {
+      chunks.push(chunk.toString('utf8'))
+    })
     proc.on('exit', (exitCode) => {
       if (exitCode !== 0) {
         observer.error(new CLIError(`Process exited with non-zero code: ${exitCode}`, chunks.join(' ')))
@@ -97,29 +95,27 @@ async function runFileScripts(scripts: Record<string, string | string[]>, files:
   }
 
   const listr = new Listr(
-    Object.entries(scripts).map(([key, value]) => {
-      return {
-        title: key,
-        task(_, task) {
-          const filesMatched = micromatch.match(files, key)
-          if (!filesMatched.length) {
-            task.skip('No matching files')
-            return
-          }
-          const filesCmd = shellEscape(filesMatched)
+    Object.entries(scripts).map(([key, value]) => ({
+      title: key,
+      task(_, task) {
+        const filesMatched = micromatch.match(files, key)
+        if (!filesMatched.length) {
+          task.skip('No matching files')
+          return
+        }
+        const filesCmd = shellEscape(filesMatched)
 
-          if (typeof value === 'string') {
-            return observableExec(`${value} ${filesCmd}`)
-          }
-          return new Listr(
-            value.map((item) => ({
-              title: item,
-              task: () => observableExec(`${item} ${filesCmd}`),
-            })),
-          )
-        },
-      }
-    }),
+        if (typeof value === 'string') {
+          return observableExec(`${value} ${filesCmd}`)
+        }
+        return new Listr(
+          value.map((item) => ({
+            title: item,
+            task: () => observableExec(`${item} ${filesCmd}`),
+          })),
+        )
+      },
+    })),
   )
 
   return listr
