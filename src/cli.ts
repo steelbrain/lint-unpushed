@@ -13,6 +13,7 @@ import Observable from 'zen-observable'
 import { Stream } from 'stream'
 import manifest from '../package.json'
 
+let stashed = false
 const MANIFEST_KEY = 'lint-unpushed'
 const REGEXP_REFERENCE = /^## ([\S+]+)\.\.\.(\S+)($| )/
 // eg: ## master...origin/master
@@ -175,7 +176,6 @@ async function main() {
     throw new CLIWarning(`Manifest key '${MANIFEST_KEY}' not found in ${LOCAL_PACKAGE}`)
   }
 
-  let stashed = false
   const listr = new Listr(
     [
       {
@@ -217,6 +217,14 @@ async function main() {
     ]).run()
   }
 }
+
+process.on('SIGINT', () => {
+  if (stashed) {
+    execa.sync('git', ['stash', 'pop'])
+  }
+  // Exit code 130 for when ctrl-c-ed
+  process.exit(130)
+})
 
 main().catch((err) => {
   console.log()
