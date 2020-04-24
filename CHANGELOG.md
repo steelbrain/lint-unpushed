@@ -1,4 +1,4 @@
-### 0.2.2
+### 0.2.0
 
 - Unstash changes properly in case of ctrl-c
 
