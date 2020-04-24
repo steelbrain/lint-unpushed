@@ -72,7 +72,6 @@ async function observableExec(command: string) {
         observer.complete()
       }
     })
-    // return execa(, { shell: true, all: true }).all as any
   })
 }
 
