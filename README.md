@@ -15,7 +15,7 @@ yarn add --dev lint-unpushed
 Example config to tell Husky to invoke `lint-unpushed`, and run Prettier on JS/JSON files
 
 
-```json
+```json5
 // package.json:
 {
   "husky": {
