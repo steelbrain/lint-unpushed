@@ -19,6 +19,7 @@ const REGEXP_REFERENCE = /^## ([\S+]+)\.\.\.(\S+)($| )/
 // eg: ## master...origin/master
 // eg: ## master...origin/master [ahead 1]
 const LOCAL_PACKAGE = path.join(process.cwd(), 'package.json')
+const REGEXP_FILES_TOKEN = /#FILES#/g
 
 commander.name(MANIFEST_KEY).version(manifest.version).parse(process.argv)
 
@@ -83,7 +84,7 @@ async function filesInGetRange(from: string, to: string): Promise<string[] | nul
 }
 
 // { lint-pushed: {*.js: x} } means the x command gets file paths as parameter
-async function runFileScripts(scripts: Record<string, string | string[]>, files: string[]) {
+async function runScripts(scripts: Record<string, string | string[]>, files: string[]) {
   if (
     !Object.values(scripts).every(
       (item) => typeof item === 'string' || (Array.isArray(item) && item.every((subItem) => typeof subItem === 'string')),
@@ -106,31 +107,15 @@ async function runFileScripts(scripts: Record<string, string | string[]>, files:
         const filesCmd = shellEscape(filesMatched)
 
         if (typeof value === 'string') {
-          return observableExec(`${value} ${filesCmd}`)
+          return observableExec(value.replace(REGEXP_FILES_TOKEN, filesCmd))
         }
         return new Listr(
           value.map((item) => ({
             title: item,
-            task: () => observableExec(`${item} ${filesCmd}`),
+            task: () => observableExec(item.replace(REGEXP_FILES_TOKEN, filesCmd)),
           })),
         )
       },
-    })),
-  )
-
-  return listr
-}
-
-// { lint-pushed: [x, y] } means x and y commands dont get files as parameters
-async function runPackageScripts(scripts: string[]) {
-  if (!scripts.every((item) => typeof item === 'string')) {
-    throw new Error(`Malformed configuration for '${MANIFEST_KEY}' at ${LOCAL_PACKAGE}. Expected value to be Array<string>`)
-  }
-
-  const listr = new Listr(
-    scripts.map((item) => ({
-      title: item,
-      task: () => observableExec(item),
     })),
   )
 
@@ -163,10 +148,8 @@ async function main() {
   const manifestValue = parsed[MANIFEST_KEY]
 
   let task: (() => Promise<Listr>) | null = null
-  if (Array.isArray(manifestValue)) {
-    task = () => runPackageScripts(manifestValue)
-  } else if (manifestValue != null && typeof manifestValue === 'object') {
-    task = () => runFileScripts(manifestValue, relevantFiles)
+  if (manifestValue != null && typeof manifestValue === 'object') {
+    task = () => runScripts(manifestValue, relevantFiles)
   } else {
     throw new CLIWarning(`Manifest key '${MANIFEST_KEY}' not found in ${LOCAL_PACKAGE}`)
   }
