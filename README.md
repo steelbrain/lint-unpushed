@@ -24,14 +24,20 @@ Example config to tell Husky to invoke `lint-unpushed`, and run Prettier on JS/J
     }
   },
   "lint-unpushed": {
-    "**/*.{js,json}": [
-      "prettier --list-different"
+    "**/*.{js,json}": "prettier --list-different #FILES#",
+    // ^ #FILES# is replaced with the list of files at runtime
+    "**/*.{ts,tsx}": [
+      "prettier --list-different #FILES#",
+      "eslint #FILES#",
+      "tsc"
     ]
+    // ^ You can also specify an array
+    // Notice how tsc doesn't have #FILES#? It lints the entire project!
   }
 }
 ```
 
-Accepted values in `lint-unpushed` are `string[]` (which do NOT get inidividual changed files as arguments) and `Record<string, string|string[]>` (which DO get individual changed files as arguments).
+Accepted values in `lint-unpushed` is `Record<string, string|string[]>`. You can place `#FILES#` anywhere, as many times as you want inside the command string. It'll be replaced with paths of files changed when the command is executed.
 
 #### License
 
