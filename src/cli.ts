@@ -51,6 +51,7 @@ async function observableExec(command: string) {
     const spawnedProcess = execNative(command, {
       encoding: 'utf8',
     })
+    spawnedProcess.stdin?.end()
     readline
       .createInterface({
         input: spawnedProcess.stdout!,
@@ -84,7 +85,7 @@ async function observableExec(command: string) {
     spawnedProcess.on('error', observer.error)
     spawnedProcess.on('exit', (exitCode) => {
       if (exitCode !== 0 && exitCode !== null) {
-        observer.error(new CLIError(`Process exited with non-zero code: ${exitCode}`, chunks.join(' ')))
+        observer.error(new CLIError(`Process exited with non-zero code: ${exitCode}`, chunks.join('\n')))
       } else {
         observer.complete()
       }
