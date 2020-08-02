@@ -35,8 +35,8 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@steelbrain/spawn": "^0.2.0",
     "commander": "^5.0.0",
-    "execa": "^4.0.0",
     "listr": "^0.14.3",
     "micromatch": "^4.0.2",
     "shell-escape": "^0.2.0",
