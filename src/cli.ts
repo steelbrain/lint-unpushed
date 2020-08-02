@@ -61,7 +61,7 @@ async function observableExec(command: string) {
         historySize: 0,
       })
       .on('line', (line) => {
-        chunks.push(line)
+        chunks.push(`[stdout] ${line}`)
         observer.next(line)
       })
       .on('error', () => {
@@ -76,7 +76,7 @@ async function observableExec(command: string) {
         historySize: 0,
       })
       .on('line', (line) => {
-        chunks.push(line)
+        chunks.push(`[stderr] ${line}`)
         observer.next(line)
       })
       .on('error', () => {
