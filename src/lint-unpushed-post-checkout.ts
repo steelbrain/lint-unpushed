@@ -10,14 +10,14 @@ async function getCurrentBranch(): Promise<string | null> {
 }
 
 async function main() {
-  if (process.argv.length !== 4) {
+  if (process.argv.length !== 5) {
     throw new CLIError(
       'Invalid invocation of post-checkout hook',
       'This bin (lint-unpushed-post-checkout) is only meant to be used as a git-hook and not be used directly.\n  Usage: lint-unpushed-post-checkout <sourceRef> <targetRef> <branchChanged>',
     )
   }
 
-  const [, sourceCommit, targetCommit, branchesChanged] = process.argv
+  const [, , sourceCommit, targetCommit, branchesChanged] = process.argv
 
   if (branchesChanged !== '1') {
     // No Op
@@ -28,7 +28,7 @@ async function main() {
     return
   }
   const [db, currentBranch] = await Promise.all([getDB(), getCurrentBranch()])
-  await db.set(`db.${currentBranch}`, sourceCommit).write()
+  await db.set(`branchSources.${currentBranch}`, sourceCommit).write()
 }
 
 invokeMain(main)
