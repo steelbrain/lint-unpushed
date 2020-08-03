@@ -120,7 +120,7 @@ async function runScripts(scripts: Record<string, string | string[]>, files: str
         const filesMatched = micromatch.match(files, key)
         if (!filesMatched.length) {
           task.skip('No matching files')
-          return
+          return undefined
         }
         const filesCmd = shellEscape(filesMatched)
 
