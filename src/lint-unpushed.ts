@@ -13,7 +13,7 @@ import commander from 'commander'
 import Observable from 'zen-observable'
 import { spawn } from '@steelbrain/spawn'
 import { CLIWarning, CLIError, invokeMain, getDB } from './helpers'
-import manifest from '../package.json'
+import { version as manifestVersion } from '../package.json'
 
 let stashed = false
 const MANIFEST_KEY = 'lint-unpushed'
@@ -24,7 +24,7 @@ const REGEXP_REFERENCE_LOCAL_ONLY = /^## ([\S+]+)$/
 const LOCAL_PACKAGE = path.join(process.cwd(), 'package.json')
 const REGEXP_FILES_TOKEN = /#FILES#/g
 
-commander.name(MANIFEST_KEY).version(manifest.version).parse(process.argv)
+commander.name(MANIFEST_KEY).version(manifestVersion).parse(process.argv)
 
 async function getReferences() {
   const output = await spawn('git', ['status', '-sb', '--porcelain=1'])

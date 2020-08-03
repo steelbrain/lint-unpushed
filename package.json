@@ -8,8 +8,9 @@
   },
   "scripts": {
     "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
-    "prepare": "sb-babel-cli src -o lib --typescript",
-    "watch": "yarn prepare -watch"
+    "clean": "rm -rf lib",
+    "prepare": "yarn clean && BABEL_ENV=production rollup -c",
+    "watch": "yarn prepare -w"
   },
   "repository": {
     "type": "git",
@@ -28,24 +29,28 @@
     "@babel/core": "^7.11.0",
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-typescript": "^7.10.4",
+    "@rollup/plugin-babel": "^5.1.0",
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@steelbrain/spawn": "^0.2.0",
     "@types/listr": "^0.14.2",
     "@types/lowdb": "^1.0.9",
     "@types/micromatch": "^4.0.1",
     "@types/node": "^14.0.27",
     "@types/shell-escape": "^0.2.0",
-    "eslint-config-steelbrain": "^10.0.0-beta2",
-    "sb-babel-cli": "^3.0.0",
-    "typescript": "^3.9.7"
-  },
-  "dependencies": {
-    "@steelbrain/spawn": "^0.2.0",
     "commander": "^6.0.0",
+    "eslint-config-steelbrain": "^10.0.0-beta2",
     "listr": "^0.14.3",
     "lowdb": "^1.0.0",
     "micromatch": "^4.0.2",
+    "rollup": "^2.23.0",
+    "rollup-plugin-preserve-shebang": "^1.0.1",
     "shell-escape": "^0.2.0",
+    "typescript": "^3.9.7",
     "zen-observable": "^0.8.15"
   },
+  "dependencies": {},
   "engines": {
     "node": ">= 8"
   }
