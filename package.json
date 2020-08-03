@@ -2,7 +2,10 @@
   "name": "lint-unpushed",
   "version": "0.3.0",
   "description": "Lint code before it's pushed",
-  "bin": "lib/cli.js",
+  "bin": {
+    "lint-unpushed": "lib/lint-unpushed.js",
+    "lint-unpushed-post-checkout": "lib/lint-unpushed-post-checkout.js"
+  },
   "scripts": {
     "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
     "prepare": "sb-babel-cli src -o lib --typescript",
