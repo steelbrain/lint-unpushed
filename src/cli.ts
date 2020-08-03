@@ -4,12 +4,13 @@
 import fs from 'fs'
 import path from 'path'
 import Listr from 'listr'
-import execa from 'execa'
 import readline from 'readline'
 import shellEscape from 'shell-escape'
 import micromatch from 'micromatch'
 import commander from 'commander'
 import Observable from 'zen-observable'
+import { spawn } from '@steelbrain/spawn'
+import { spawnSync, exec as execNative } from 'child_process'
 import { Stream } from 'stream'
 import manifest from '../package.json'
 
@@ -31,42 +32,60 @@ export class CLIError extends Error {
 }
 
 async function getReferences() {
-  try {
-    const output = await execa('git', ['status', '-sb', '--porcelain=1'])
-    // Test first line against the regexp
-    const matches = REGEXP_REFERENCE.exec(output.stdout.slice(0, output.stdout.indexOf('\n')))
-    if (matches) {
-      return { local: matches[1], remote: matches[2] }
-    }
-    return null
-  } catch (_) {
+  const output = await spawn('git', ['status', '-sb', '--porcelain=1'])
+  if (output.exitCode !== 0) {
     return null
   }
+
+  // Test first line against the regexp
+  const matches = REGEXP_REFERENCE.exec(output.stdout.slice(0, output.stdout.indexOf('\n')))
+  if (matches) {
+    return { local: matches[1], remote: matches[2] }
+  }
+  return null
 }
 
 async function observableExec(command: string) {
   return new Observable((observer) => {
     const chunks: string[] = []
-    const proc = execa(command, { shell: true, all: true })
-    proc.on('error', (err) => {
-      observer.error(err)
+    const spawnedProcess = execNative(command, {
+      encoding: 'utf8',
     })
-    const lineInterface = readline.createInterface({
-      input: proc.all!,
-      // No-op output
-      output: new Stream.Writable(),
-      terminal: false,
-      historySize: 0,
-    })
-    lineInterface.on('line', (line) => {
-      observer.next(line)
-    })
-    proc.all!.on('data', (chunk) => {
-      chunks.push(chunk.toString('utf8'))
-    })
-    proc.on('exit', (exitCode) => {
-      if (exitCode !== 0) {
-        observer.error(new CLIError(`Process exited with non-zero code: ${exitCode}`, chunks.join(' ')))
+    spawnedProcess.stdin?.end()
+    readline
+      .createInterface({
+        input: spawnedProcess.stdout!,
+        // No-op output
+        output: new Stream.Writable(),
+        terminal: false,
+        historySize: 0,
+      })
+      .on('line', (line) => {
+        chunks.push(`[stdout] ${line}`)
+        observer.next(line)
+      })
+      .on('error', () => {
+        // No Op
+      })
+    readline
+      .createInterface({
+        input: spawnedProcess.stderr!,
+        // No-op output
+        output: new Stream.Writable(),
+        terminal: false,
+        historySize: 0,
+      })
+      .on('line', (line) => {
+        chunks.push(`[stderr] ${line}`)
+        observer.next(line)
+      })
+      .on('error', () => {
+        // No Op
+      })
+    spawnedProcess.on('error', observer.error)
+    spawnedProcess.on('exit', (exitCode) => {
+      if (exitCode !== 0 && exitCode !== null) {
+        observer.error(new CLIError(`Process exited with non-zero code: ${exitCode}`, chunks.join('\n')))
       } else {
         observer.complete()
       }
@@ -75,12 +94,11 @@ async function observableExec(command: string) {
 }
 
 async function filesInGetRange(from: string, to: string): Promise<string[] | null> {
-  try {
-    const output = await execa('git', ['diff', `${to}..${from}`, '--name-only', '--diff-filter=d'])
-    return output.stdout.split('\n')
-  } catch (_) {
+  const output = await spawn('git', ['diff', `${to}..${from}`, '--name-only', '--diff-filter=d'])
+  if (output.exitCode !== 0) {
     return null
   }
+  return output.stdout.split('\n')
 }
 
 // { lint-pushed: {*.js: x} } means the x command gets file paths as parameter
@@ -159,13 +177,9 @@ async function main() {
       {
         title: 'Stash changes',
         async task() {
-          try {
-            const output = await execa('git', ['stash', '--include-untracked'])
-            if (output.stdout !== 'No local changes to save') {
-              stashed = true
-            }
-          } catch (_) {
-            // No Op
+          const output = await spawn('git', ['stash', '--include-untracked'])
+          if (output.exitCode === 0 && output.stdout !== 'No local changes to save') {
+            stashed = true
           }
         },
       },
@@ -188,7 +202,7 @@ async function main() {
         title: 'Unstash changes',
         async task() {
           if (stashed) {
-            await execa('git', ['stash', 'pop'])
+            await spawn('git', ['stash', 'pop'])
           }
         },
       },
@@ -198,7 +212,11 @@ async function main() {
 
 process.on('SIGINT', () => {
   if (stashed) {
-    execa.sync('git', ['stash', 'pop'])
+    try {
+      spawnSync('git', ['stash', 'pop'])
+    } catch (_) {
+      // No op
+    }
   }
   // Exit code 130 for when ctrl-c-ed
   process.exit(130)
