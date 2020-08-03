@@ -1,6 +1,6 @@
 {
   "name": "lint-unpushed",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Lint code before it's pushed",
   "bin": {
     "lint-unpushed": "lib/lint-unpushed.js",
