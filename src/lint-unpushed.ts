@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-/* eslint-disable max-classes-per-file */
 
 import fs from 'fs'
 import path from 'path'
+import { Stream } from 'stream'
+import { spawnSync, exec as execNative } from 'child_process'
+
 import Listr from 'listr'
 import readline from 'readline'
 import shellEscape from 'shell-escape'
@@ -10,8 +12,7 @@ import micromatch from 'micromatch'
 import commander from 'commander'
 import Observable from 'zen-observable'
 import { spawn } from '@steelbrain/spawn'
-import { spawnSync, exec as execNative } from 'child_process'
-import { Stream } from 'stream'
+import { CLIWarning, CLIError, invokeMain } from './helpers'
 import manifest from '../package.json'
 
 let stashed = false
@@ -23,13 +24,6 @@ const LOCAL_PACKAGE = path.join(process.cwd(), 'package.json')
 const REGEXP_FILES_TOKEN = /#FILES#/g
 
 commander.name(MANIFEST_KEY).version(manifest.version).parse(process.argv)
-
-export class CLIWarning extends Error {}
-export class CLIError extends Error {
-  constructor(message: string, public detail: string) {
-    super(message)
-  }
-}
 
 async function getReferences() {
   const output = await spawn('git', ['status', '-sb', '--porcelain=1'])
@@ -222,17 +216,4 @@ process.on('SIGINT', () => {
   process.exit(130)
 })
 
-main().catch((err) => {
-  console.log()
-  if (err instanceof CLIWarning) {
-    console.error('Warning:', err && err.message)
-    process.exit(0)
-  }
-  if (err instanceof CLIError) {
-    console.error('Error:', err.message)
-    console.error(err.detail)
-    process.exit(1)
-  }
-  console.error(err && err.stack)
-  process.exit(1)
-})
+invokeMain(main)
