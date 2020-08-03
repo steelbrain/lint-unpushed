@@ -12,7 +12,7 @@ import micromatch from 'micromatch'
 import commander from 'commander'
 import Observable from 'zen-observable'
 import { spawn } from '@steelbrain/spawn'
-import { CLIWarning, CLIError, invokeMain, getDB } from './helpers'
+import { CLIWarning, CLIError, invokeMain, dbRead } from './helpers'
 import { version as manifestVersion } from '../package.json'
 
 let stashed = false
@@ -150,7 +150,7 @@ async function main() {
 
   if (headRemote == null) {
     console.error('Warning: Local branch not found remotely, comparing against possible local source')
-    const possibleLocalSource = (await getDB()).get(`branchSources.${head.local}`)
+    const possibleLocalSource = await dbRead<string>(`branchSources.${head.local}`)
     if (possibleLocalSource == null) {
       throw new CLIWarning('Unable to get local source for branch. Ignoring')
     }

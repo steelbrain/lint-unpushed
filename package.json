@@ -42,7 +42,7 @@
     "commander": "^6.0.0",
     "eslint-config-steelbrain": "^10.0.0-beta2",
     "listr": "^0.14.3",
-    "lowdb": "^1.0.0",
+    "lodash": "^4.17.19",
     "micromatch": "^4.0.2",
     "rollup": "^2.23.0",
     "rollup-plugin-preserve-shebang": "^1.0.1",

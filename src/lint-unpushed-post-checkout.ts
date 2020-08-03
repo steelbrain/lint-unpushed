@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from '@steelbrain/spawn'
-import { CLIError, invokeMain, getDB } from './helpers'
+import { CLIError, invokeMain, dbWrite } from './helpers'
 
 async function getCurrentBranch(): Promise<string | null> {
   const output = await spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
@@ -27,8 +27,8 @@ async function main() {
     // No new branch created
     return
   }
-  const [db, currentBranch] = await Promise.all([getDB(), getCurrentBranch()])
-  await db.set(`branchSources.${currentBranch}`, sourceCommit).write()
+  const currentBranch = await getCurrentBranch()
+  await dbWrite(`branchSources.${currentBranch}`, sourceCommit)
 }
 
 invokeMain(main)
