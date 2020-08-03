@@ -11,6 +11,7 @@ export default [
   input,
   output: {
     file: output,
+    format: 'cjs',
   },
   external: ['fs', 'path', 'child_process', 'stream', 'util', 'events', 'assert', 'constants', 'readline', 'os'],
   plugins: [
