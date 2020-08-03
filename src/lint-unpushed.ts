@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-/* eslint-disable max-classes-per-file */
 
 import fs from 'fs'
 import path from 'path'
+import { Stream } from 'stream'
+import { spawnSync, exec as execNative } from 'child_process'
+
 import Listr from 'listr'
 import readline from 'readline'
 import shellEscape from 'shell-escape'
@@ -10,13 +12,13 @@ import micromatch from 'micromatch'
 import commander from 'commander'
 import Observable from 'zen-observable'
 import { spawn } from '@steelbrain/spawn'
-import { spawnSync, exec as execNative } from 'child_process'
-import { Stream } from 'stream'
+import { CLIWarning, CLIError, invokeMain, getDB } from './helpers'
 import manifest from '../package.json'
 
 let stashed = false
 const MANIFEST_KEY = 'lint-unpushed'
 const REGEXP_REFERENCE = /^## ([\S+]+)\.\.\.(\S+)($| )/
+const REGEXP_REFERENCE_LOCAL_ONLY = /^## ([\S+]+)$/
 // eg: ## master...origin/master
 // eg: ## master...origin/master [ahead 1]
 const LOCAL_PACKAGE = path.join(process.cwd(), 'package.json')
@@ -24,24 +26,23 @@ const REGEXP_FILES_TOKEN = /#FILES#/g
 
 commander.name(MANIFEST_KEY).version(manifest.version).parse(process.argv)
 
-export class CLIWarning extends Error {}
-export class CLIError extends Error {
-  constructor(message: string, public detail: string) {
-    super(message)
-  }
-}
-
 async function getReferences() {
   const output = await spawn('git', ['status', '-sb', '--porcelain=1'])
   if (output.exitCode !== 0) {
     return null
   }
+  const outputFirstLine = output.stdout.slice(0, output.stdout.indexOf('\n'))
 
   // Test first line against the regexp
-  const matches = REGEXP_REFERENCE.exec(output.stdout.slice(0, output.stdout.indexOf('\n')))
+  const matches = REGEXP_REFERENCE.exec(outputFirstLine)
   if (matches) {
     return { local: matches[1], remote: matches[2] }
   }
+  const matchesLocalOnly = REGEXP_REFERENCE_LOCAL_ONLY.exec(outputFirstLine)
+  if (matchesLocalOnly) {
+    return { local: matchesLocalOnly[1], remote: null }
+  }
+
   return null
 }
 
@@ -120,7 +121,7 @@ async function runScripts(scripts: Record<string, string | string[]>, files: str
         const filesMatched = micromatch.match(files, key)
         if (!filesMatched.length) {
           task.skip('No matching files')
-          return
+          return undefined
         }
         const filesCmd = shellEscape(filesMatched)
 
@@ -145,9 +146,19 @@ async function main() {
   if (head == null) {
     throw new CLIWarning('Unable to get local/remote refs. Ignoring')
   }
-  const relevantFiles = await filesInGetRange(head.local, head.remote)
+  let { remote: headRemote } = head
+
+  if (headRemote == null) {
+    console.error('Warning: Local branch not found remotely, comparing against possible local source')
+    const possibleLocalSource = (await getDB()).get(`branchSources.${head.local}`)
+    if (possibleLocalSource == null) {
+      throw new CLIWarning('Unable to get local source for branch. Ignoring')
+    }
+    headRemote = String(possibleLocalSource)
+  }
+  const relevantFiles = await filesInGetRange(head.local, headRemote)
   if (relevantFiles == null) {
-    throw new CLIWarning(`Unable to get changed files between ${head.local}..${head.remote}. Ignoring`)
+    throw new CLIWarning(`Unable to get changed files between ${head.local}..${headRemote}. Ignoring`)
   }
 
   if (!fs.existsSync(LOCAL_PACKAGE)) {
@@ -222,17 +233,4 @@ process.on('SIGINT', () => {
   process.exit(130)
 })
 
-main().catch((err) => {
-  console.log()
-  if (err instanceof CLIWarning) {
-    console.error('Warning:', err && err.message)
-    process.exit(0)
-  }
-  if (err instanceof CLIError) {
-    console.error('Error:', err.message)
-    console.error(err.detail)
-    process.exit(1)
-  }
-  console.error(err && err.stack)
-  process.exit(1)
-})
+invokeMain(main)
