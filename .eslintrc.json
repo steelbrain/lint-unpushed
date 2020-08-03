@@ -5,6 +5,7 @@
     "no-underscore-dangle": "off",
     "no-use-before-define": "off",
     "import/extensions": "off",
+    "import/no-extraneous-dependencies": "off",
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/no-inferrable-types": "off",
     "@typescript-eslint/member-delimiter-style": "off"
