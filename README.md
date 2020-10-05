@@ -2,6 +2,11 @@
 
 Lint Unpushed will make sure your code passes relevant tests before `git push`. Best used with [husky][].
 
+⚠️ Due to a current bug in Husky v4.x, `post-checkout` hook does not receieve all the args it needs to work. You may
+have to set `lint-unpushed-post-checkout` as your `post-checkout` hook manually until it is resolved. For more info, see
+[typicode/husky#737](https://github.com/typicode/husky/pull/737)
+
+
 ### Installation
 
 ```
@@ -37,7 +42,8 @@ Example config to tell Husky to invoke `lint-unpushed`, and run Prettier on JS/J
 }
 ```
 
-Accepted values in `lint-unpushed` is `Record<string, string|string[]>`. You can place `#FILES#` anywhere, as many times as you want inside the command string. It'll be replaced with paths of files changed when the command is executed.
+Accepted values in `lint-unpushed` is `Record<string, string|string[]>`. You can place `#FILES#` anywhere, as many times as you want inside
+the command string. It'll be replaced with paths of files changed when the command is executed.
 
 #### License
 
