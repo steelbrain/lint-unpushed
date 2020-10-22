@@ -36,7 +36,6 @@
     "@types/micromatch": "^4.0.1",
     "@types/node": "^14.0.27",
     "@types/shell-escape": "^0.2.0",
-    "commander": "^6.0.0",
     "cross-env": "^7.0.2",
     "eslint-config-steelbrain": "^10.0.0-beta2",
     "listr": "^0.14.3",

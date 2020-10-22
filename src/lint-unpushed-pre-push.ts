@@ -9,11 +9,9 @@ import Listr from 'listr'
 import readline from 'readline'
 import shellEscape from 'shell-escape'
 import micromatch from 'micromatch'
-import commander from 'commander'
 import Observable from 'zen-observable'
 import { spawn } from '@steelbrain/spawn'
 import { CLIWarning, CLIError, invokeMain } from './helpers'
-import { version as manifestVersion } from '../package.json'
 import getDatabase from './database'
 
 let stashed = false
@@ -24,8 +22,6 @@ const REGEXP_REFERENCE_LOCAL_ONLY = /^## ([\S+]+)$/
 // eg: ## master...origin/master [ahead 1]
 const LOCAL_PACKAGE = path.join(process.cwd(), 'package.json')
 const REGEXP_FILES_TOKEN = /#FILES#/g
-
-commander.name(MANIFEST_KEY).version(manifestVersion).parse(process.argv)
 
 async function getReferences() {
   const output = await spawn('git', ['status', '-sb', '--porcelain=1'])
