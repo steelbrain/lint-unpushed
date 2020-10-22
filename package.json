@@ -2,10 +2,7 @@
   "name": "lint-unpushed",
   "version": "0.4.0",
   "description": "Lint code before it's pushed",
-  "bin": {
-    "lint-unpushed": "lib/lint-unpushed.js",
-    "lint-unpushed-post-checkout": "lib/lint-unpushed-post-checkout.js"
-  },
+  "bin": {},
   "scripts": {
     "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
     "clean": "rm -rf lib",
