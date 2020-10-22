@@ -12,8 +12,9 @@ import micromatch from 'micromatch'
 import commander from 'commander'
 import Observable from 'zen-observable'
 import { spawn } from '@steelbrain/spawn'
-import { CLIWarning, CLIError, invokeMain, dbRead } from './helpers'
+import { CLIWarning, CLIError, invokeMain } from './helpers'
 import { version as manifestVersion } from '../package.json'
+import getDatabase from './database'
 
 let stashed = false
 const MANIFEST_KEY = 'lint-unpushed'
@@ -142,6 +143,7 @@ async function runScripts(scripts: Record<string, string | string[]>, files: str
 }
 
 async function main() {
+  const database = await getDatabase(process.cwd())
   const head = await getReferences()
   if (head == null) {
     throw new CLIWarning('Unable to get local/remote refs. Ignoring')
@@ -150,7 +152,7 @@ async function main() {
 
   if (headRemote == null) {
     console.error('Warning: Local branch not found remotely, comparing against possible local source')
-    const possibleLocalSource = await dbRead<string>(`branchSources.${head.local}`)
+    const possibleLocalSource = await database.getBranchSource(head.local)
     if (possibleLocalSource == null) {
       throw new CLIWarning('Unable to get local source for branch. Ignoring')
     }

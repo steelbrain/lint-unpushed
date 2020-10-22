@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
     "clean": "rm -rf lib",
-    "prepare": "yarn clean && BABEL_ENV=production rollup -c",
+    "prepare": "yarn clean && cross-env BABEL_ENV=production rollup -c",
     "watch": "yarn prepare -w"
   },
   "repository": {
@@ -40,9 +40,9 @@
     "@types/node": "^14.0.27",
     "@types/shell-escape": "^0.2.0",
     "commander": "^6.0.0",
+    "cross-env": "^7.0.2",
     "eslint-config-steelbrain": "^10.0.0-beta2",
     "listr": "^0.14.3",
-    "lodash": "^4.17.19",
     "micromatch": "^4.0.2",
     "patch-package": "^6.2.2",
     "rollup": "^2.23.0",
