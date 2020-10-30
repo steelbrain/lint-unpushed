@@ -1,3 +1,7 @@
+### 0.5.0
+
+- BREAKING: Node.js v10 is the minimum required version
+
 ### 0.4.0
 
 - POTENTIALLY UNSTABLE: Bundle package with rollup to make it compact
