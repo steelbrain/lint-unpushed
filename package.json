@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
     "clean": "rm -rf lib",
-    "prepare": "yarn clean && cross-env BABEL_ENV=production rollup -c",
+    "prepare": "yarn clean",
     "watch": "yarn prepare -w"
   },
   "repository": {
@@ -23,31 +23,20 @@
   ],
   "homepage": "https://github.com/steelbrain/lint-unpushed#readme",
   "devDependencies": {
-    "@babel/core": "^7.11.0",
-    "@babel/preset-env": "^7.11.0",
-    "@babel/preset-typescript": "^7.10.4",
-    "@rollup/plugin-babel": "^5.1.0",
-    "@rollup/plugin-commonjs": "^14.0.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^8.4.0",
     "@steelbrain/spawn": "^0.2.0",
     "@types/listr": "^0.14.2",
-    "@types/lowdb": "^1.0.9",
     "@types/micromatch": "^4.0.1",
     "@types/node": "^14.0.27",
     "@types/shell-escape": "^0.2.0",
-    "cross-env": "^7.0.2",
     "eslint-config-steelbrain": "^10.0.0-beta2",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
     "listr": "^0.14.3",
     "micromatch": "^4.0.2",
-    "patch-package": "^6.2.2",
-    "rollup": "^2.23.0",
-    "rollup-plugin-preserve-shebang": "^1.0.1",
-    "shell-escape": "^0.2.0",
-    "typescript": "^3.9.7",
-    "zen-observable": "^0.8.15"
+    "rxjs": "^6.6.3",
+    "shell-escape": "^0.2.0"
   },
-  "dependencies": {},
   "engines": {
     "node": ">= 8"
   }
