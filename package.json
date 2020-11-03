@@ -3,6 +3,7 @@
   "version": "0.4.0",
   "description": "Lint code before it's pushed",
   "bin": {
+    "lint-unpushed-pre-push": "./lib/lint-unpushed-pre-push",
     "lint-unpushed-install": "./lib/lint-unpushed-install"
   },
   "scripts": {

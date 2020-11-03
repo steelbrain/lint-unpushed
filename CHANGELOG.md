@@ -1,6 +1,9 @@
 ### 0.5.0
 
 - BREAKING: Node.js v10 is the minimum required version
+- BREAKING: `lint-unpushed` bin has been renamed to `lint-unpushed-pre-push`. This change will only
+  affect you if you continue to use Husky.
+- BREAKING: `lint-unpushed-post-checkout` has been removed, see alternative below
 - Add `lint-unpushed-install` bin for `prepare` scripts so you can use this package without Husky present.
   This change was necessary given the unfixed bugs in Husky and the general lack of direction of project
   along with uncertain roadmap.
