@@ -110,19 +110,24 @@ async function runScripts(scripts: Record<string, string | string[]>, files: str
       `Malformed configuration for '${MANIFEST_KEY}' at ${LOCAL_PACKAGE}. Expected value to be Record<string, string | string[]>`,
     )
   }
-  const filesNormalized = files.map((filePath) => filePath.split(path.sep).join('/'))
-  // ^ Normalize paths, aka convert windows slahes into nix slashes
 
   const listr = new Listr(
     Object.entries(scripts).map(([key, value]) => ({
       title: key,
       task(_, task) {
-        const filesMatched = micromatch.match(filesNormalized, key)
+        const filesMatched = micromatch.match(files, key)
         if (!filesMatched.length) {
           task.skip('No matching files')
           return undefined
         }
-        const filesCmd = shellEscape(filesMatched)
+        const filesNormalized = filesMatched.map((filePath) => filePath.split('/').join(path.sep))
+        // ^ Normalize paths, aka convert windows slahes into nix slashes
+
+        const filesCmd =
+          process.platform === 'win32'
+            ? // Windows arg escaping stolen from https://github.com/atom/atom/blob/37001d1218ccbda6be5f471c7e0994c1a438fe41/src/buffered-process.js#L98
+              filesNormalized.map((filePath) => `"${filePath.toString().replace(/"/g, '\\"')}"`).join(' ')
+            : shellEscape(filesNormalized)
 
         if (typeof value === 'string') {
           return observableExec(value.replace(REGEXP_FILES_TOKEN, filesCmd))
