@@ -3,9 +3,9 @@
   "version": "0.5.0-beta1",
   "description": "Lint code before it's pushed",
   "bin": {
-    "lint-unpushed-post-checkout": "./lib/lint-unpushed-post-checkout",
-    "lint-unpushed-pre-push": "./lib/lint-unpushed-pre-push",
-    "lint-unpushed-install": "./lib/lint-unpushed-install"
+    "lint-unpushed-post-checkout": "lib/lint-unpushed-post-checkout.js",
+    "lint-unpushed-pre-push": "lib/lint-unpushed-pre-push.js",
+    "lint-unpushed-install": "lib/lint-unpushed-install.js"
   },
   "scripts": {
     "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
