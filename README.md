@@ -12,11 +12,14 @@ yarn add --dev lint-unpushed
 
 ### Configuration
 
-Example config to tell Husky to invoke `lint-unpushed`, and run Prettier on JS/JSON files
+Example config setup `lint-unpushed` on deps install, and run Prettier on JS/JSON files before push
 
 ```json5
 // package.json:
 {
+  "scripts": {
+    "prepare": "lint-unpushed-install"
+  },
   "lint-unpushed": {
     "**/*.{js,json}": "prettier --list-different #FILES#",
     // ^ #FILES# is replaced with the list of files at runtime

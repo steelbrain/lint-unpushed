@@ -1,6 +1,9 @@
 ### 0.5.0
 
 - BREAKING: Node.js v10 is the minimum required version
+- Add `lint-unpushed-install` bin for `prepare` scripts so you can use this package without Husky present.
+  This change was necessary given the unfixed bugs in Husky and the general lack of direction of project
+  along with uncertain roadmap.
 
 ### 0.4.0
 
