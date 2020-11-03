@@ -4,8 +4,7 @@
 - BREAKING: `lint-unpushed` bin has been renamed to `lint-unpushed-pre-push`. This change will only
   affect you if you continue to use Husky.
 - Add `lint-unpushed-install` bin for `prepare` scripts so you can use this package without Husky present.
-  This change was necessary given the unfixed bugs in Husky and the general lack of direction of project
-  along with uncertain roadmap.
+  This change was necessary given the unfixed bugs in Husky and the general lack of direction of project.
 
 ### 0.4.0
 
