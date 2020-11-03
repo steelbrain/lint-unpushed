@@ -242,4 +242,6 @@ process.on('SIGINT', () => {
   process.exit(130)
 })
 
-invokeMain(main)
+invokeMain(main, {
+  showNoVerifyHint: true,
+})
