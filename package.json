@@ -2,7 +2,9 @@
   "name": "lint-unpushed",
   "version": "0.4.0",
   "description": "Lint code before it's pushed",
-  "bin": {},
+  "bin": {
+    "lint-unpushed-install": "./lib/lint-unpushed-install"
+  },
   "scripts": {
     "lint": "(tsc -p . --noEmit) && (eslint . --ext .ts) && (prettier --list-different src/*.ts)",
     "clean": "rm -rf lib",
