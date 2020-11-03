@@ -1,6 +1,6 @@
 {
   "name": "lint-unpushed",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Lint code before it's pushed",
   "bin": {
     "lint-unpushed-post-checkout": "lib/lint-unpushed-post-checkout.js",
