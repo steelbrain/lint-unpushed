@@ -9,11 +9,10 @@ import Listr from 'listr'
 import readline from 'readline'
 import shellEscape from 'shell-escape'
 import micromatch from 'micromatch'
-import commander from 'commander'
-import Observable from 'zen-observable'
+import { Observable } from 'rxjs'
 import { spawn } from '@steelbrain/spawn'
-import { CLIWarning, CLIError, invokeMain, dbRead } from './helpers'
-import { version as manifestVersion } from '../package.json'
+import { CLIWarning, CLIError, invokeMain } from './helpers'
+import getDatabase from './database'
 
 let stashed = false
 const MANIFEST_KEY = 'lint-unpushed'
@@ -23,8 +22,6 @@ const REGEXP_REFERENCE_LOCAL_ONLY = /^## ([\S+]+)$/
 // eg: ## master...origin/master [ahead 1]
 const LOCAL_PACKAGE = path.join(process.cwd(), 'package.json')
 const REGEXP_FILES_TOKEN = /#FILES#/g
-
-commander.name(MANIFEST_KEY).version(manifestVersion).parse(process.argv)
 
 async function getReferences() {
   const output = await spawn('git', ['status', '-sb', '--porcelain=1'])
@@ -123,7 +120,14 @@ async function runScripts(scripts: Record<string, string | string[]>, files: str
           task.skip('No matching files')
           return undefined
         }
-        const filesCmd = shellEscape(filesMatched)
+        const filesNormalized = filesMatched.map((filePath) => filePath.split('/').join(path.sep))
+        // ^ Normalize paths, aka convert windows slahes into nix slashes
+
+        const filesCmd =
+          process.platform === 'win32'
+            ? // Windows arg escaping stolen from https://github.com/atom/atom/blob/37001d1218ccbda6be5f471c7e0994c1a438fe41/src/buffered-process.js#L98
+              filesNormalized.map((filePath) => `"${filePath.toString().replace(/"/g, '\\"')}"`).join(' ')
+            : shellEscape(filesNormalized)
 
         if (typeof value === 'string') {
           return observableExec(value.replace(REGEXP_FILES_TOKEN, filesCmd))
@@ -142,6 +146,7 @@ async function runScripts(scripts: Record<string, string | string[]>, files: str
 }
 
 async function main() {
+  const database = await getDatabase(process.cwd())
   const head = await getReferences()
   if (head == null) {
     throw new CLIWarning('Unable to get local/remote refs. Ignoring')
@@ -150,7 +155,7 @@ async function main() {
 
   if (headRemote == null) {
     console.error('Warning: Local branch not found remotely, comparing against possible local source')
-    const possibleLocalSource = await dbRead<string>(`branchSources.${head.local}`)
+    const possibleLocalSource = database.getBranchSource(head.local)
     if (possibleLocalSource == null) {
       throw new CLIWarning('Unable to get local source for branch. Ignoring')
     }

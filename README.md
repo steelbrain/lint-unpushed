@@ -1,11 +1,6 @@
 # Lint Unpushed
 
-Lint Unpushed will make sure your code passes relevant tests before `git push`. Best used with [husky][].
-
-⚠️ Due to a current bug in Husky v4.x, `post-checkout` hook does not receieve all the args it needs to work. You may
-have to set `lint-unpushed-post-checkout` as your `post-checkout` hook manually until it is resolved. For more info, see
-[typicode/husky#737](https://github.com/typicode/husky/pull/737)
-
+Lint Unpushed will make sure your code passes relevant tests before `git push`.
 
 ### Installation
 
@@ -15,26 +10,31 @@ npm install --save-dev lint-unpushed
 yarn add --dev lint-unpushed
 ```
 
+Then add `lint-unpushed-install` to your `prepare` script like so:
+
+```json5
+// package.json
+{
+  "scripts": {
+    "prepare": "lint-unpushed-install"
+  }
+}
+```
+
 ### Configuration
 
-Example config to tell Husky to invoke `lint-unpushed`, and run Prettier on JS/JSON files
+Example config setup `lint-unpushed` to run Prettier on JS/JSON files, and Typescript typechecker before push
 
 ```json5
 // package.json:
 {
-  "husky": {
-    "hooks": {
-      "pre-push": "lint-unpushed",
-      "post-checkout": "lint-unpushed-post-checkout"
-    }
-  },
   "lint-unpushed": {
     "**/*.{js,json}": "prettier --list-different #FILES#",
     // ^ #FILES# is replaced with the list of files at runtime
     "**/*.{ts,tsx}": [
       "prettier --list-different #FILES#",
       "eslint #FILES#",
-      "tsc"
+      "tsc -p . --noEmit"
     ]
     // ^ You can also specify an array
     // Notice how tsc doesn't have #FILES#? It lints the entire project!
@@ -49,4 +49,3 @@ the command string. It'll be replaced with paths of files changed when the comma
 
 This project is licensed under the terms of MIT License. See the License file for more info.
 
-[husky]:https://github.com/typicode/husky

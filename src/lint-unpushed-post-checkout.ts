@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { spawn } from '@steelbrain/spawn'
-import { CLIError, invokeMain, dbWrite } from './helpers'
+import { CLIError, invokeMain } from './helpers'
+import getDatabase from './database'
 
 async function getCurrentBranch(): Promise<string | null> {
   const output = await spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
@@ -16,6 +17,7 @@ async function main() {
       'This bin (lint-unpushed-post-checkout) is only meant to be used as a git-hook and not be used directly.\n  Usage: lint-unpushed-post-checkout <sourceRef> <targetRef> <branchChanged>',
     )
   }
+  const database = await getDatabase(process.cwd())
 
   const [, , sourceCommit, targetCommit, branchesChanged] = process.argv
 
@@ -28,7 +30,10 @@ async function main() {
     return
   }
   const currentBranch = await getCurrentBranch()
-  await dbWrite(`branchSources.${currentBranch}`, sourceCommit)
+  if (currentBranch != null) {
+    database.setBranchSource(currentBranch, sourceCommit)
+    await database.write()
+  }
 }
 
 invokeMain(main)

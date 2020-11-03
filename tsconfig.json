@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "jsx": "preserve",
     "module": "CommonJS",
     "esModuleInterop": true,
@@ -10,7 +10,10 @@
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-    "lib": ["es2015", "es2016", "es2017", "es2018", "esnext"]
+    "lib": ["es2015", "es2016", "es2017", "es2018", "esnext"],
+    "newLine": "lf",
+    "outDir": "lib",
+    "target": "ES2019"
   },
   "include": ["src"],
   "exclude": [
