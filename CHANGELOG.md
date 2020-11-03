@@ -1,3 +1,7 @@
+### 0.5.2
+
+- Fix the git stash popping after running checks on some platforms
+
 ### 0.5.1
 
 - Fix missing `$PWD/node_modules/.bin` from PATH

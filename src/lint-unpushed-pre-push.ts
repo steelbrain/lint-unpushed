@@ -198,7 +198,7 @@ async function main() {
         title: 'Stash changes',
         async task() {
           const output = await spawn('git', ['stash', '--include-untracked'])
-          if (output.exitCode === 0 && output.stdout !== 'No local changes to save') {
+          if (output.exitCode === 0 && output.stdout.trim() !== 'No local changes to save') {
             stashed = true
           }
         },
