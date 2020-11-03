@@ -110,12 +110,14 @@ async function runScripts(scripts: Record<string, string | string[]>, files: str
       `Malformed configuration for '${MANIFEST_KEY}' at ${LOCAL_PACKAGE}. Expected value to be Record<string, string | string[]>`,
     )
   }
+  const filesNormalized = files.map((filePath) => filePath.split(path.sep).join('/'))
+  // ^ Normalize paths, aka convert windows slahes into nix slashes
 
   const listr = new Listr(
     Object.entries(scripts).map(([key, value]) => ({
       title: key,
       task(_, task) {
-        const filesMatched = micromatch.match(files, key)
+        const filesMatched = micromatch.match(filesNormalized, key)
         if (!filesMatched.length) {
           task.skip('No matching files')
           return undefined
@@ -148,7 +150,7 @@ async function main() {
 
   if (headRemote == null) {
     console.error('Warning: Local branch not found remotely, comparing against possible local source')
-    const possibleLocalSource = await database.getBranchSource(head.local)
+    const possibleLocalSource = database.getBranchSource(head.local)
     if (possibleLocalSource == null) {
       throw new CLIWarning('Unable to get local source for branch. Ignoring')
     }
