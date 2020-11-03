@@ -48,6 +48,10 @@ async function observableExec(command: string) {
     const chunks: string[] = []
     const spawnedProcess = execNative(command, {
       encoding: 'utf8',
+      env: {
+        ...process.env,
+        PATH: [process.env.PATH, path.join(process.cwd(), 'node_modules', '.bin')].join(path.delimiter),
+      },
     })
     spawnedProcess.stdin?.end()
     readline

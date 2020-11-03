@@ -1,3 +1,7 @@
+### 0.5.1
+
+- Fix missing `$PWD/node_modules/.bin` from PATH
+
 ### 0.5.0
 
 - BREAKING: Node.js v10 is the minimum required version
