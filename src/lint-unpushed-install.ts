@@ -44,7 +44,7 @@ async function main() {
       // Uninstall whatever was there before
     }
     try {
-      await fs.promises.writeFile(targetFile, ['#!/usr/bin/env node', `require('${sourceFile}')`].join(os.EOL))
+      await fs.promises.writeFile(targetFile, ['#!/usr/bin/env node', `require(${JSON.stringify(sourceFile)})`].join(os.EOL))
       await fs.promises.chmod(targetFile, 0x755)
     } catch (err) {
       throw new CLIError(`Unable to create Git hook for ${path.basename(targetFile)}`, err.stack)
